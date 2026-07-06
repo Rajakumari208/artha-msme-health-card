@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ARTHA — Live Prototype</title>
+<style>
+  :root{
+    --teal-dark:#083F38; --teal:#0B5D52; --teal-mid:#12836F; --teal-soft:#DCEEEA;
+    --orange:#E8622C; --gold:#F4A300; --ink:#1B2320; --gray:#6B7570; --gray-lt:#B9C6C2;
+    --bg:#F5F9F8; --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  .shell{max-width:1180px;margin:0 auto;padding:28px 32px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:15px;}
+  .brand h1{font-size:19px;margin:0;letter-spacing:.2px;}
+  .brand span{display:block;font-size:11.5px;color:var(--gray);font-weight:600;letter-spacing:.4px;}
+  .tabs{display:flex;gap:6px;background:#E8EFED;padding:5px;border-radius:12px;}
+  .tab{border:none;background:transparent;padding:10px 18px;border-radius:9px;font-size:13.5px;font-weight:700;color:var(--gray);cursor:pointer;transition:.2s;}
+  .tab.active{background:var(--teal-dark);color:white;box-shadow:0 3px 10px rgba(8,63,56,.25);}
+  .panel{display:none;animation:fade .35s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .card{background:var(--card);border-radius:16px;box-shadow:0 2px 18px rgba(8,63,56,.07);padding:26px;}
+  .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--teal-mid);text-transform:uppercase;margin:0 0 6px;}
+  h2{margin:0 0 4px;font-size:22px;}
+  .sub{color:var(--gray);font-size:13.5px;margin:0 0 20px;}
+
+  /* ---- Scene 1: Live Engine ---- */
+  .pipeline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 10px;flex-wrap:wrap;}
+  .src{background:var(--teal-mid);color:white;border-radius:12px;padding:14px 10px;text-align:center;font-size:12px;font-weight:700;flex:1;min-width:110px;opacity:.35;transform:translateY(6px);transition:.5s;}
+  .src.lit{opacity:1;transform:translateY(0);box-shadow:0 6px 16px rgba(18,131,111,.35);}
+  .arrow-mid{font-size:22px;color:var(--gray-lt);}
+  .engine-box{background:var(--teal-dark);border-radius:16px;padding:20px;color:white;min-width:170px;text-align:center;opacity:.4;transition:.5s;}
+  .engine-box.lit{opacity:1;box-shadow:0 8px 24px rgba(8,63,56,.4);}
+  .engine-box b{font-size:15px;}
+  .engine-box small{display:block;color:#BFE0D8;font-size:11px;margin-top:4px;}
+  .score-out{background:var(--gold);color:var(--teal-dark);border-radius:16px;padding:16px;text-align:center;min-width:140px;opacity:0;transform:scale(.85);transition:.5s;}
+  .score-out.lit{opacity:1;transform:scale(1);}
+  .score-out .num{font-size:30px;font-weight:800;line-height:1;}
+  .score-out .lbl{font-size:11px;font-weight:700;margin-top:2px;}
+  .replay-btn{margin-top:18px;background:var(--orange);color:white;border:none;padding:11px 22px;border-radius:10px;font-weight:700;font-size:13.5px;cursor:pointer;}
+  .replay-btn:hover{filter:brightness(1.06);}
+  .status-line{margin-top:16px;font-size:13px;color:var(--teal-dark);font-weight:700;min-height:18px;}
+
+  /* ---- Scene 2: MSME App ---- */
+  .phone{max-width:340px;margin:0 auto;background:var(--card);border:10px solid var(--teal-dark);border-radius:34px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.18);}
+  .phone-head{background:var(--teal-dark);color:white;padding:16px;text-align:center;font-weight:800;font-size:14px;}
+  .phone-body{padding:18px;min-height:400px;}
+  .connect-btn{width:100%;background:var(--orange);color:white;border:none;padding:13px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;}
+  .consent-box{background:var(--teal-soft);border-radius:12px;padding:14px;font-size:12px;color:var(--teal-dark);margin-top:14px;line-height:1.5;}
+  .gauge-wrap{text-align:center;margin:18px 0 6px;}
+  .gauge{width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--gold) 0deg, var(--gold) 0deg, #E7ECEA 0deg);display:flex;align-items:center;justify-content:center;margin:0 auto;transition:background 1.2s ease;}
+  .gauge-inner{width:112px;height:112px;border-radius:50%;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge-inner b{font-size:26px;color:var(--teal-dark);}
+  .gauge-inner span{font-size:10px;color:var(--gray);font-weight:700;}
+  .conf-tag{display:inline-block;margin-top:10px;background:var(--teal-soft);color:var(--teal-dark);font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;}
+  .dim{margin-top:12px;}
+  .dim-name{font-size:11.5px;font-weight:700;display:flex;justify-content:space-between;margin-bottom:4px;}
+  .dim-bar{height:7px;background:#E7ECEA;border-radius:4px;overflow:hidden;}
+  .dim-fill{height:100%;background:var(--teal);width:0;transition:width 1s ease;border-radius:4px;}
+  .tip{margin-top:16px;background:#FFF6E6;border-left:3px solid var(--gold);padding:10px 12px;font-size:11.5px;border-radius:6px;color:#6B4E00;}
+
+  /* ---- Scene 3: RM Console ---- */
+  .applicants{display:flex;flex-direction:column;gap:8px;}
+  .app-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;border:1.5px solid #E7ECEA;cursor:pointer;font-size:13px;font-weight:700;transition:.15s;}
+  .app-row:hover{border-color:var(--teal-mid);}
+  .app-row.selected{background:var(--teal-dark);color:white;border-color:var(--teal-dark);}
+  .app-row .tag{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:20px;background:var(--teal-soft);color:var(--teal-dark);}
+  .app-row.selected .tag{background:rgba(255,255,255,.18);color:white;}
+  .detail-empty{color:var(--gray);font-size:13px;text-align:center;padding:60px 10px;}
+  .stat-row{display:flex;gap:12px;margin-bottom:16px;}
+  .stat{flex:1;background:#F3F7F6;border-radius:12px;padding:14px;text-align:center;}
+  .stat b{font-size:22px;color:var(--teal-dark);display:block;}
+  .stat span{font-size:10.5px;color:var(--gray);font-weight:700;}
+  .reason{font-size:12.5px;padding:7px 0;border-bottom:1px dashed #E7ECEA;}
+  .reason.pos{color:var(--teal-dark);} .reason.neg{color:var(--orange);}
+  .heatmap{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:6px;}
+  .heatmap div{height:20px;border-radius:4px;}
+  .decision-row{display:flex;gap:10px;margin-top:18px;}
+  .btn{flex:1;border:none;padding:11px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;}
+  .btn.approve{background:var(--teal);color:white;}
+  .btn.refer{background:#F1F1F1;color:var(--ink);}
+  .decision-banner{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:12.5px;font-weight:700;display:none;}
+  .decision-banner.show{display:block;}
+
+  footer{text-align:center;color:var(--gray);font-size:11.5px;margin-top:34px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div><h1>ARTHA</h1><span>MSME FINANCIAL HEALTH CARD · TRACK 03</span></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="t1">Live Engine</button>
+      <button class="tab" data-tab="t2">MSME App</button>
+      <button class="tab" data-tab="t3">RM Console</button>
+    </div>
+  </div>
+
+  <!-- SCENE 1 -->
+  <div class="panel active" id="t1">
+    <div class="card">
+      <p class="eyebrow">Scene 1 — Scoring Engine</p>
+      <h2>Four data rails become one living score</h2>
+      <p class="sub">Watch GST, UPI, Account Aggregator and EPFO data flow into ARTHA and come out as a bank-ready decision.</p>
+      <div class="pipeline">
+        <div class="src" id="s1">GST Filings</div>
+        <div class="src" id="s2">UPI Transactions</div>
+        <div class="src" id="s3">Bank / AA Data</div>
+        <div class="src" id="s4">EPFO Records</div>
+        <div class="arrow-mid">→</div>
+        <div class="engine-box" id="engine"><b>ARTHA</b><small>Scoring · Confidence · SHAP</small></div>
+        <div class="arrow-mid">→</div>
+        <div class="score-out" id="scoreOut"><div class="num" id="scoreNum">--</div><div class="lbl">Health Score</div></div>
+      </div>
+      <div class="status-line" id="statusLine">Press "Run Live Scoring" to simulate a real assessment.</div>
+      <button class="replay-btn" onclick="runEngine()">▶ Run Live Scoring</button>
+    </div>
+  </div>
+
+  <!-- SCENE 2 -->
+  <div class="panel" id="t2">
+    <div class="card">
+      <p class="eyebrow">Scene 2 — MSME Self-Serve App</p>
+      <h2>The business owner's view</h2>
+      <p class="sub">Simulates the consent flow embedded inside IDBI's mobile banking app.</p>
+      <div class="phone">
+        <div class="phone-head">My ARTHA Score</div>
+        <div class="phone-body" id="phoneBody">
+          <p style="font-size:12.5px;color:var(--gray);line-height:1.6;">Sundar Fabrics Pvt Ltd hasn't connected its data yet. Connecting takes under a minute and never shares your data without consent.</p>
+          <button class="connect-btn" onclick="connectData()">Connect My Data via AA</button>
+          <div class="consent-box">🔒 You control what's shared: GST returns, UPI statements, EPFO contributions. Revoke access anytime.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 3 -->
+  <div class="panel" id="t3">
+    <div class="card grid2">
+      <div>
+        <p class="eyebrow">Scene 3 — Underwriter Console</p>
+        <h2>Portfolio queue</h2>
+        <p class="sub">Click an applicant to pull their live ARTHA score.</p>
+        <div class="applicants">
+          <div class="app-row" onclick="selectApp(this,742,87,'Sundar Fabrics Pvt Ltd','MSME Working Capital · ₹12L')"><span>Sundar Fabrics Pvt Ltd</span><span class="tag">NTB</span></div>
+          <div class="app-row" onclick="selectApp(this,611,64,'Meridian Auto Parts','Term Loan · ₹28L')"><span>Meridian Auto Parts</span><span class="tag">NTC</span></div>
+          <div class="app-row" onclick="selectApp(this,803,92,'Kaveri Textiles','Invoice Discounting · ₹8L')"><span>Kaveri Textiles</span><span class="tag">Existing</span></div>
+        </div>
+      </div>
+      <div id="rmDetail"><div class="detail-empty">Select an applicant to view their ARTHA score, reason codes and recommended decision.</div></div>
+    </div>
+  </div>
+
+  <footer>ARTHA — AI-driven Real-time Trust &amp; Health Assessment · IDBI Innovate 2026 · Team CodeElite</footer>
+</div>
+
+<script>
+// Tabs
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  });
+});
+
+// Scene 1: engine animation
+function runEngine(){
+  const srcs=['s1','s2','s3','s4'];
+  srcs.forEach(id=>document.getElementById(id).classList.remove('lit'));
+  document.getElementById('engine').classList.remove('lit');
+  document.getElementById('scoreOut').classList.remove('lit');
+  document.getElementById('scoreNum').textContent='--';
+  document.getElementById('statusLine').textContent='Pulling consented data…';
+  srcs.forEach((id,i)=>{
+    setTimeout(()=>document.getElementById(id).classList.add('lit'), 250*(i+1));
+  });
+  setTimeout(()=>{
+    document.getElementById('engine').classList.add('lit');
+    document.getElementById('statusLine').textContent='Extracting features · weighting confidence · generating reason codes…';
+  }, 1300);
+  setTimeout(()=>{
+    document.getElementById('scoreOut').classList.add('lit');
+    document.getElementById('scoreNum').textContent='742';
+    document.getElementById('statusLine').textContent='Done — score generated in 0.4s (simulated), confidence 0.87.';
+  }, 2400);
+}
+
+// Scene 2: MSME app
+function connectData(){
+  const body=document.getElementById('phoneBody');
+  body.innerHTML='<p style="text-align:center;font-size:12.5px;color:var(--gray);padding:30px 0;">Connecting via Account Aggregator…</p>';
+  setTimeout(()=>{
+    body.innerHTML=`
+      <div class="gauge-wrap">
+        <div class="gauge" id="gauge"><div class="gauge-inner"><b id="gnum">0</b><span>ARTHA SCORE</span></div></div>
+        <div class="conf-tag">Confidence: High (0.87)</div>
+      </div>
+      <div class="dim"><div class="dim-name"><span>Cash Flow Discipline</span><span>82%</span></div><div class="dim-bar"><div class="dim-fill" id="d1"></div></div></div>
+      <div class="dim"><div class="dim-name"><span>Compliance Health</span><span>74%</span></div><div class="dim-bar"><div class="dim-fill" id="d2"></div></div></div>
+      <div class="dim"><div class="dim-name"><span>Revenue Stability</span><span>68%</span></div><div class="dim-bar"><div class="dim-fill" id="d3"></div></div></div>
+      <div class="dim"><div class="dim-name"><span>Formalization Trend</span><span>90%</span></div><div class="dim-bar"><div class="dim-fill" id="d4"></div></div></div>
+      <div class="tip">💡 Tip: file next month's GST return before the 11th to keep your Compliance Health score climbing.</div>
+    `;
+    document.getElementById('gauge').style.background='conic-gradient(var(--gold) 267deg, #E7ECEA 267deg)';
+    let n=0; const t=setInterval(()=>{ n+=12; if(n>=742){n=742;clearInterval(t);} document.getElementById('gnum').textContent=n; },30);
+    setTimeout(()=>{document.getElementById('d1').style.width='82%';document.getElementById('d2').style.width='74%';document.getElementById('d3').style.width='68%';document.getElementById('d4').style.width='90%';},100);
+  }, 1100);
+}
+
+// Scene 3: RM console
+function selectApp(el,score,conf,name,loan){
+  document.querySelectorAll('.app-row').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+  const colors=['#12836F','#F4A300','#6FBF73','#E8622C','#0B5D52','#F4A300'];
+  let heat='';
+  for(let i=0;i<18;i++){heat+=`<div style="background:${colors[Math.floor(Math.random()*colors.length)]};opacity:.85"></div>`;}
+  document.getElementById('rmDetail').innerHTML=`
+    <p class="eyebrow">Applicant</p>
+    <h2 style="font-size:18px;">${name}</h2>
+    <p class="sub">${loan}</p>
+    <div class="stat-row">
+      <div class="stat"><b>${score}</b><span>ARTHA SCORE</span></div>
+      <div class="stat"><b>0.${conf}</b><span>CONFIDENCE INDEX</span></div>
+    </div>
+    <p style="font-size:12px;font-weight:800;color:var(--teal-dark);margin-bottom:4px;">TOP REASON CODES</p>
+    <div class="reason pos">+ Consistent UPI inflows over 18 months</div>
+    <div class="reason pos">+ GST filed on time, 24 / 24 months</div>
+    <div class="reason neg">− Thin EPFO contribution history</div>
+    <p style="font-size:12px;font-weight:800;color:var(--teal-dark);margin:14px 0 4px;">PORTFOLIO RISK HEATMAP</p>
+    <div class="heatmap">${heat}</div>
+    <div class="decision-row">
+      <button class="btn approve" onclick="decide(true)">Approve</button>
+      <button class="btn refer" onclick="decide(false)">Refer for Review</button>
+    </div>
+    <div class="decision-banner" id="decBanner"></div>
+  `;
+}
+function decide(approve){
+  const b=document.getElementById('decBanner');
+  b.className='decision-banner show';
+  b.style.background = approve? '#E4F3EE':'#FFF3E4';
+  b.style.color = approve? '#0B5D52':'#8A4B00';
+  b.textContent = approve? '✔ Loan pre-approved — routed to disbursal workflow.':'↺ Referred to senior underwriter with ARTHA reason codes attached.';
+}
+</script>
+</body>
+</html>
